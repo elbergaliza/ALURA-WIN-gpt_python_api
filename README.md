@@ -9,3 +9,6 @@ Execução do curso ALURA - GPT e Python: criando ferramentas com a API
 *   Aprenda a diferença entre os vários modelos e como calcular os custos
 *   Entenda o que é prompt engineer e prompt template
 *   Conheça o processamento de informações em lote e como é feito
+
+**Modulos instalados**
+pip install openai python-dotenv pydub instabot Pillow
