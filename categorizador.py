@@ -5,6 +5,10 @@ import os
 # Criacao da API_KEY
 # https://platform.openai.com/api-keys
 
+load_dotenv()  # Carrega as variaveis de ambiente do arquivo .env
+cliente = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+modelo = "gpt-4o"
+
 
 def categoriza_produto(categorias: str, conteudo: str) -> str:
     '''
@@ -33,10 +37,6 @@ def categoriza_produto(categorias: str, conteudo: str) -> str:
     )
     return pasta.choices[0].message.content or ""
 
-
-load_dotenv()  # Carrega as variaveis de ambiente do arquivo .env
-cliente = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-modelo = "gpt-4o"
 
 i_categorias = input("Entre as Categorias separadas por virgulas: ")
 
