@@ -10,16 +10,6 @@ load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 modelo = "gpt-4"
 
-# Helper functions for creating messages
-
-
-# def create_system_message(content: str) -> dict:
-#     return {"role": "system", "content": content}
-
-
-# def create_user_message(content: str) -> dict:
-#     return {"role": "user", "content": content}
-
 
 prompt_sistema = """
 Identifique o perfil de compra para cada cliente a seguir.
