@@ -16,7 +16,9 @@ try:
     from dotenv import load_dotenv
     # Carrega variáveis de ambiente
     load_dotenv()
-except ImportError:
+except ImportError as e:
+    print("Erro ao carregar o arquivo .env")
+    raise e
     # Se dotenv não estiver disponível, continua sem carregar
     pass
 
@@ -38,6 +40,9 @@ class ParametrosIA:
 
     def __init__(self):
         self.chave_api = os.getenv('OPENAI_API_KEY', '')
+        if not self.chave_api:
+            raise ValueError("A chave da API não está preenchida")
+        self.modelo = None  # Modelo atualmente selecionado
         self.tempo_espera_padrao = 30  # segundos
         self.temperatura_padrao = 0.7
         self.max_tokens_padrao = 1000
@@ -97,6 +102,10 @@ class ParametrosIA:
     def listar_modelos(self) -> Dict[str, ModeloConfig]:
         """Retorna todos os modelos configurados"""
         return self.modelos.copy()
+
+    def listar_modelos_disponiveis(self):
+        """Retorna nomes dos modelos disponíveis"""
+        return list(self.modelos.keys())
 
     def calcular_custo(self, nome_modelo: str, tokens_entrada: int, tokens_saida: int = 0) -> float:
         """

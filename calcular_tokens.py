@@ -1,3 +1,5 @@
+# TODO: Criar um metodo de comparacao de custo entre modelos
+
 import tiktoken
 
 modelo = "gpt-4"

@@ -1,53 +1,49 @@
+from openai.types.chat import ChatCompletionSystemMessageParam, ChatCompletionUserMessageParam
 from bianca.parametros import obter_parametros
 from bianca.modelo import ModeloIA
-
+from util.util import carregar_arquivo, salvar_arquivo
 
 # Obtém a instância de parâmetros
 parametros = obter_parametros()
-modelo = ModeloIA("gpt-4o", parametros)
+modelo = ModeloIA("gpt-4", parametros)
 
 
 lista_de_produtos = ["Camisetas de algodão orgânico",
                      "Jeans feitos com materiais reciclados", "Maquiagem mineral"]
 
 
-def carrega_arquivo(arquivo_produto) -> str:
-    try:
-        with open(f"./dados/avaliacoes-{arquivo_produto}.txt", "r", encoding="utf-8") as f:
-            dados_arquivo = f.read()
-    except FileNotFoundError:
-        print(
-            f"Arquivo de avaliações para o produto '{arquivo_produto}' não encontrado.")
-        return ""
-
-    return dados_arquivo
-
-
-def salvando_arquivo(arquivo_produto, dados_arquivo):
-    try:
-        with open(f"./dados/analise-{arquivo_produto}.txt", "w", encoding="utf-8") as f:
-            f.write(dados_arquivo)
-    except Exception as e:
-        raise e
-
-
-def analisar_sentimentos(produto):
-    prompt_sistema = f"""
-    Analise o sentimento das avaliações do produto {produto} e retorne um resumo das avaliações.
+def analisar_sentimentos():
+    """
+    Analisa o sentimento das avaliações de todos os produtos da lista_de_produtos.
     """
     for produto in lista_de_produtos:
-        prompt_usuario = carrega_arquivo(produto)
+        prompt_sistema = """
+        Você é um analisador de sentimentos de avaliações de produtos.
+        Escreva um parágrafo com até 50 palavras resumindo as avaliações e 
+        depois atribua qual o sentimento geral para o produto.
+        Identifique também 3 pontos fortes e 3 pontos fracos identificados a partir das avaliações.
+
+        # Formato de Saída
+
+        Nome do Produto:
+        Resumo das Avaliações:
+        Sentimento Geral: [utilize aqui apenas Positivo, Negativo ou Neutro]
+        Ponto fortes: lista com três bullets
+        Pontos fracos: lista com três bullets
+        """
+        try:
+            prompt_usuario = carregar_arquivo(
+                f"./dados/avaliacoes-{produto}.txt")
+        except Exception as e:
+            print(e)
+            continue
+
         print(f"Iniciou a análise de sentimentos do produto {produto}")
 
         lista_mensagens = [
-            {
-                "role": "system",
-                "content": prompt_sistema
-            },
-            {
-                "role": "user",
-                "content": prompt_usuario
-            }
+            ChatCompletionSystemMessageParam(
+                role="system", content=prompt_sistema),
+            ChatCompletionUserMessageParam(role="user", content=prompt_usuario)
         ]
 
         resposta = modelo.cliente.chat.completions.create(
@@ -55,11 +51,12 @@ def analisar_sentimentos(produto):
             messages=lista_mensagens
         )
         texto_resposta = resposta.choices[0].message.content
-        salvando_arquivo(produto, texto_resposta)
+
+        # Verifica se há resposta antes de salvar
+        if texto_resposta:
+            salvar_arquivo(f"./dados/analise-{produto}.txt", texto_resposta)
+        else:
+            print(f"⚠️ Nenhuma resposta recebida para o produto {produto}")
 
 
-# print(f"Iniciou a análise de sentimentos do produto {arquivo_produto}")
-# Adicione aqui o código para análise de sentimentos usando 'modelo' e 'prompt_usuario'
-# Exemplo:
-# resultado = modelo.analisa_sentimentos(prompt_usuario)
-# print(resultado)
+analisar_sentimentos()

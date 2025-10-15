@@ -20,14 +20,14 @@ Execução do curso ALURA - GPT e Python: criando ferramentas com a API
 
 
 
-**Bibliotecas instaladas:** python-dotenv pydub instabot Pillow
+**Bibliotecas instaladas:** openai python-dotenv tiktoken
 
-&nbsp;	pip install -r requirements.txt
+pip install -r requirements.txt
 
 
 
 **Criando e Ativando o Ambiente Virtual:**
-	python -m venv .venv
+python -m venv .venv
 
-&nbsp;	.\\Scripts\\activate
+ 	.\\Scripts\\activate
 
