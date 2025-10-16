@@ -1,15 +1,27 @@
 """
-Módulo de parâmetros de IA - BIANCA
+Módulo de Configurações de IA - BIANCA
 Biblioteca de Inteligência Artificial para Novos Componentes e Aplicações
 
-Este módulo centraliza todas as configurações de IA, incluindo modelos,
-preços, limites de tokens e configurações gerais.
-Realiza a leitura dos parametros do arquivo .env
-# TODO: Implementar na leitura dos parametros do arquivo .env, toda as informacoes dos modelos dade IA
+Este módulo centraliza APENAS as configurações básicas de IA, incluindo:
+- Configurações de modelos (preços, limites, temperaturas)
+- Configurações de API (chave, timeouts)
+- Configurações gerais do sistema
+
+FUNCIONALIDADES DE CÁLCULO E COMPARAÇÃO foram movidas para calcular_tokens.py
+
+Modelos incluídos:
+- GPT-4 e GPT-4 Turbo (modelos clássicos)
+- GPT-4o e GPT-4o-mini (modelos otimizados mais recentes)
+- o1-preview e o1-mini (modelos de raciocínio)
+- GPT-3.5 Turbo (versões variadas)
+- Modelos de Embeddings (text-embedding-3-small/large)
+- Modelos de Moderação (text-moderation-latest)
+
+Refatorado em: Dezembro 2024
 """
 
 import os
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from dataclasses import dataclass
 
 try:
@@ -47,8 +59,9 @@ class ParametrosIA:
         self.temperatura_padrao = 0.7
         self.max_tokens_padrao = 1000
 
-        # Configurações dos modelos
+        # Configurações dos modelos - Atualizados com modelos mais recentes da OpenAI
         self.modelos = {
+            # Modelos GPT-4 (mais antigos, ainda disponíveis)
             'gpt-4': ModeloConfig(
                 nome='gpt-4',
                 preco_entrada_por_1k_tokens=0.03,
@@ -56,7 +69,7 @@ class ParametrosIA:
                 limite_tokens=8192,
                 temperatura_padrao=0.7,
                 max_tokens_resposta=4096,
-                descricao='Modelo mais avançado da OpenAI, ideal para tarefas complexas'
+                descricao='Modelo GPT-4 original, ideal para tarefas complexas'
             ),
             'gpt-4-turbo': ModeloConfig(
                 nome='gpt-4-turbo',
@@ -65,8 +78,50 @@ class ParametrosIA:
                 limite_tokens=128000,
                 temperatura_padrao=0.7,
                 max_tokens_resposta=4096,
-                descricao='Versão turbo do GPT-4, mais rápida e econômica'
+                descricao='Versão turbo do GPT-4 com contexto expandido'
             ),
+
+            # Modelos GPT-4o (mais recentes)
+            'gpt-4o': ModeloConfig(
+                nome='gpt-4o',
+                preco_entrada_por_1k_tokens=0.005,
+                preco_saida_por_1k_tokens=0.015,
+                limite_tokens=128000,
+                temperatura_padrao=0.7,
+                max_tokens_resposta=4096,
+                descricao='Modelo GPT-4o otimizado, mais rápido e econômico que GPT-4'
+            ),
+            'gpt-4o-mini': ModeloConfig(
+                nome='gpt-4o-mini',
+                preco_entrada_por_1k_tokens=0.00015,
+                preco_saida_por_1k_tokens=0.0006,
+                limite_tokens=128000,
+                temperatura_padrao=0.7,
+                max_tokens_resposta=16384,
+                descricao='Versão mini do GPT-4o, extremamente econômica'
+            ),
+
+            # Modelos o1 (raciocínio)
+            'o1-preview': ModeloConfig(
+                nome='o1-preview',
+                preco_entrada_por_1k_tokens=0.15,
+                preco_saida_por_1k_tokens=0.60,
+                limite_tokens=128000,
+                temperatura_padrao=0.7,
+                max_tokens_resposta=4096,
+                descricao='Modelo o1 para raciocínio complexo e programação'
+            ),
+            'o1-mini': ModeloConfig(
+                nome='o1-mini',
+                preco_entrada_por_1k_tokens=0.075,
+                preco_saida_por_1k_tokens=0.30,
+                limite_tokens=128000,
+                temperatura_padrao=0.7,
+                max_tokens_resposta=4096,
+                descricao='Versão mini do o1, mais econômica para raciocínio'
+            ),
+
+            # Modelos GPT-3.5
             'gpt-3.5-turbo': ModeloConfig(
                 nome='gpt-3.5-turbo',
                 preco_entrada_por_1k_tokens=0.001,
@@ -84,6 +139,46 @@ class ParametrosIA:
                 temperatura_padrao=0.7,
                 max_tokens_resposta=4096,
                 descricao='Versão 1106 do GPT-3.5 Turbo com melhorias'
+            ),
+            'gpt-3.5-turbo-0125': ModeloConfig(
+                nome='gpt-3.5-turbo-0125',
+                preco_entrada_por_1k_tokens=0.0005,
+                preco_saida_por_1k_tokens=0.0015,
+                limite_tokens=16384,
+                temperatura_padrao=0.7,
+                max_tokens_resposta=4096,
+                descricao='Versão 0125 do GPT-3.5 Turbo, mais econômica'
+            ),
+
+            # Modelos de Embeddings
+            'text-embedding-3-small': ModeloConfig(
+                nome='text-embedding-3-small',
+                preco_entrada_por_1k_tokens=0.00002,
+                preco_saida_por_1k_tokens=0.0,
+                limite_tokens=8191,
+                temperatura_padrao=0.0,
+                max_tokens_resposta=1536,
+                descricao='Modelo de embeddings pequeno e econômico'
+            ),
+            'text-embedding-3-large': ModeloConfig(
+                nome='text-embedding-3-large',
+                preco_entrada_por_1k_tokens=0.00013,
+                preco_saida_por_1k_tokens=0.0,
+                limite_tokens=8191,
+                temperatura_padrao=0.0,
+                max_tokens_resposta=3072,
+                descricao='Modelo de embeddings grande com alta qualidade'
+            ),
+
+            # Modelos de Moderação
+            'text-moderation-latest': ModeloConfig(
+                nome='text-moderation-latest',
+                preco_entrada_por_1k_tokens=0.0001,
+                preco_saida_por_1k_tokens=0.0,
+                limite_tokens=32768,
+                temperatura_padrao=0.0,
+                max_tokens_resposta=1,
+                descricao='Modelo para moderação de conteúdo'
             )
         }
 
@@ -103,49 +198,9 @@ class ParametrosIA:
         """Retorna todos os modelos configurados"""
         return self.modelos.copy()
 
-    def listar_modelos_disponiveis(self):
+    def listar_modelos_disponiveis(self) -> List[str]:
         """Retorna nomes dos modelos disponíveis"""
         return list(self.modelos.keys())
-
-    def calcular_custo(self, nome_modelo: str, tokens_entrada: int, tokens_saida: int = 0) -> float:
-        """
-        Calcula o custo de uma requisição baseado no modelo e número de tokens
-
-        Args:
-            nome_modelo: Nome do modelo a ser usado
-            tokens_entrada: Número de tokens de entrada
-            tokens_saida: Número de tokens de saída
-
-        Returns:
-            Custo total em dólares
-        """
-        modelo = self.obter_modelo(nome_modelo)
-        if not modelo:
-            raise ValueError(f"Modelo '{nome_modelo}' não encontrado")
-
-        custo_entrada = (tokens_entrada / 1000) * \
-            modelo.preco_entrada_por_1k_tokens
-        custo_saida = (tokens_saida / 1000) * modelo.preco_saida_por_1k_tokens
-
-        return custo_entrada + custo_saida
-
-    def verificar_limite_tokens(self, nome_modelo: str, tokens_entrada: int, tokens_saida: int = 0) -> bool:
-        """
-        Verifica se o número de tokens está dentro do limite do modelo
-
-        Args:
-            nome_modelo: Nome do modelo
-            tokens_entrada: Número de tokens de entrada
-            tokens_saida: Número de tokens de saída
-
-        Returns:
-            True se está dentro do limite, False caso contrário
-        """
-        modelo = self.obter_modelo(nome_modelo)
-        if not modelo:
-            return False
-
-        return (tokens_entrada + tokens_saida) <= modelo.limite_tokens
 
     def obter_tempo_espera(self) -> int:
         """Retorna o tempo de espera padrão em segundos"""
@@ -200,7 +255,7 @@ class ParametrosIA:
             'chave_api_configurada': bool(self.chave_api)
         }
 
-    def comparar_modelos(self, modelo1: str, modelo2: str) -> Dict[str, Any]:
+    def comparar_modelos_configuracao(self, modelo1: str, modelo2: str) -> Dict[str, Any]:
         """
         Compara dois modelos e retorna informações de comparação
 

@@ -75,7 +75,8 @@ def main():
 
     # 5. Comparar dois modelos
     print("\n5. Comparação entre modelos:")
-    comparacao = parametros.comparar_modelos('gpt-4', 'gpt-3.5-turbo')
+    comparacao = parametros.comparar_modelos_configuracao(
+        'gpt-4', 'gpt-3.5-turbo')
     print(
         f"   Modelo mais caro: {comparacao['comparacao']['modelo_mais_caro']}")
     print(
